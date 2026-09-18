@@ -24,5 +24,8 @@
     "globals": "^17.12.0",
     "nock": "^14.0.17",
     "vitest": "^5.0.1"
+  },
+  "dependencies": {
+    "axios": "^1.20.0"
   }
 }
