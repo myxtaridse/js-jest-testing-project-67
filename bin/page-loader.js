@@ -1,5 +1,7 @@
-import { program } from "commander";
+import { program } from 'commander'
 import pageLoader from '../src/index.js'
+import debug from 'debug'
+const log =  debug.debug('page-loader')
 
 program
   .name('page-loader')
@@ -12,7 +14,12 @@ program
   .argument('<targetUrl>')
   .option('-o, --output <dir>', 'output dir', process.cwd())
   .action((targetUrl, { output }) => {
-    console.log(pageLoader(targetUrl, output))
+    pageLoader(targetUrl, output)
+      .then((data) => log(data))
+      .catch(err => {
+        log('ERROR:', err.message)
+        process.exit(1)
+      })
   })
 
 program.parse()
