@@ -11,7 +11,9 @@ const parserLink = (link) => {
 }
 
 const filesForModified = [
-  { tagname: 'img', attr: 'src', responseType: 'arraybuffer' }
+  { tagname: 'img', attr: 'src', responseType: 'arraybuffer' },
+  { tagname: 'link', attr: 'href', responseType: 'arraybuffer' },
+  { tagname: 'script', attr: 'src', responseType: 'arraybuffer' },
 ]
 
 const downloadResources = ($, targetUrl, filesDirName, outputDir) => {
@@ -19,13 +21,15 @@ const downloadResources = ($, targetUrl, filesDirName, outputDir) => {
   filesForModified.forEach(({ tagname, attr, responseType }) => {
     $(tagname).each((_i, el) => {
       const currentAttr = $(el).attr(attr)
+      const urlResource = new URL(currentAttr, targetUrl)
+      if (targetUrl.hostname !== urlResource.hostname) return
+
       const hostname = targetUrl.hostname.replace(/\./g, '-')
-      const changeAttr = currentAttr.replace(/\//g, '-')
-      const filepath = `${filesDirName}/${[hostname, changeAttr].join('')}`
+      const changeAttr = urlResource.pathname.replace(/\//g, '-')
+      const addExpansion = changeAttr.split('.').length > 1 ? '' : '.html'
+      const filepath = `${filesDirName}/${[hostname, changeAttr].join('')}${addExpansion}`
 
       $(el).attr(attr, filepath)
-
-      const urlResource = new URL(currentAttr, targetUrl)
       const promise = axios.get(urlResource.href, { responseType })
         .then(({ data }) => fsp.writeFile(path.join(outputDir, filepath), data))
       promises.push(promise)

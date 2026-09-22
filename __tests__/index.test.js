@@ -33,8 +33,8 @@ test('checking the download of the page and images to the specified directory', 
   const getFixture = filename => path.join(process.cwd(), '__fixtures__', filename)
   const getFile = (...filepath) => path.join(pageDir, ...filepath)
 
-  const basicHTML = await readFile(getFixture('before.html'), 'utf-8')
-  const expectedHTML = await readFile(getFixture('after.html'), 'utf-8')
+  const basicHTML = await readFile(getFixture('basic1.html'), 'utf-8')
+  const expectedHTML = await readFile(getFixture('expected1.html'), 'utf-8')
   const resource = await readFile(getFixture('nodejs.png'))
 
   const filenameLoader = 'ru-hexlet-io-courses.html'
@@ -64,15 +64,16 @@ test('checking the loading of the page and other resources from the page to the 
   const getFixture = filename => path.join(process.cwd(), '__fixtures__', filename)
   const getFile = (...filepath) => path.join(pageDir, ...filepath)
 
-  const basicHTML = await readFile(getFixture('before.html'), 'utf-8')
-  const expectedHTML = await readFile(getFixture('after.html'), 'utf-8')
+  const basicHTML = await readFile(getFixture('basic2.html'), 'utf-8')
+  const expectedHTML = await readFile(getFixture('expected2.html'), 'utf-8')
 
   const filenameLoader = 'ru-hexlet-io-courses.html'
   const dirnameLoader = 'ru-hexlet-io-courses_files'
   const recources = [
     { reqParams: '/assets/professions/nodejs.png', content: Buffer.from('fake image content'), filename: 'ru-hexlet-io-assets-professions-nodejs.png' },
     { reqParams: '/assets/application.css', content: 'body { color: red; }', filename: 'ru-hexlet-io-assets-application.css' },
-    { reqParams: '/packs/js/runtime.js', content: 'console.log("test")', filename: 'ru-hexlet-io-packs-js-runtime.js' }
+    { reqParams: '/packs/js/runtime.js', content: 'console.log("test")', filename: 'ru-hexlet-io-packs-js-runtime.js' },
+    { reqParams: '/courses', content: '<div>Hello, World!</div>', filename: 'ru-hexlet-io-courses.html' }
   ]
   
   nock('https://ru.hexlet.io')
