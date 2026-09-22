@@ -4,102 +4,91 @@ import { mkdtemp, readFile, rm, stat } from 'fs/promises'
 import path from 'path'
 import nock from 'nock'
 import * as cheerio from 'cheerio'
-
 import pageLoader from '../src/index.js'
+
+const reqNock = (domain, urlPath, content) => 
+  nock(domain)
+    .get(urlPath)
+    .reply(200, content)
+
+const getPath = (dirName, ...filepath) => path.join(dirName, ...filepath)
+const getContentFile = pathname => readFile(pathname, 'utf-8')
+const getFixture = filename => path.join(process.cwd(), '__fixtures__', filename)
+
+const domain = 'https://ru.hexlet.io'
+const pageFilename = 'ru-hexlet-io-courses.html'
+const targetUrl = 'https://ru.hexlet.io/courses'
+const resourcesDirName = 'ru-hexlet-io-courses_files'
 
 let pageDir = null
 beforeEach(async () => {
-  pageDir = await mkdtemp(path.join(os.tmpdir(), 'page-loader-'))
+  pageDir = await mkdtemp(getPath(os.tmpdir(), 'page-loader-'))
 })
 
+
 test('checking the installation of the page from the internet and checking the creation of a file in the specified directory', async () => {
-  const filename = 'ru-hexlet-io-courses.html'
   const basic = `<div>Page</div>`
+  reqNock(domain, '/courses', basic)
 
-  nock('https://ru.hexlet.io')
-    .get('/courses')
-    .reply(200, basic)
+  const resUrl = await pageLoader(targetUrl, pageDir)
+  expect(resUrl).toBe(pageFilename)
 
-  const resUrl = await pageLoader('https://ru.hexlet.io/courses', pageDir)
-  expect(resUrl).toBe(filename)
-
-  const actual = await readFile(path.join(pageDir, filename), 'utf-8')
+  const actual = await getContentFile(getPath(pageDir, pageFilename))
   const $actual = cheerio.load(actual)
   const $expected = cheerio.load(basic)
   expect($actual.html()).toBe($expected.html())
 })
 
 test('checking the download of the page and images to the specified directory', async () => {
-  const getFixture = filename => path.join(process.cwd(), '__fixtures__', filename)
-  const getFile = (...filepath) => path.join(pageDir, ...filepath)
-
-  const basicHTML = await readFile(getFixture('basic1.html'), 'utf-8')
-  const expectedHTML = await readFile(getFixture('expected1.html'), 'utf-8')
+  const basicHTML = await getContentFile(getFixture('basic1.html'))
+  const expectedHTML = await getContentFile(getFixture('expected1.html'))
   const resource = await readFile(getFixture('nodejs.png'))
 
-  const filenameLoader = 'ru-hexlet-io-courses.html'
-  const dirnameLoader = 'ru-hexlet-io-courses_files'
-  const resourceLoader = 'ru-hexlet-io-assets-professions-nodejs.png'
-  
-  nock('https://ru.hexlet.io')
-    .get('/courses')
-    .reply(200, basicHTML)
+  const resourceFilename = 'ru-hexlet-io-assets-professions-nodejs.png'
 
-  nock('https://ru.hexlet.io')
-    .get('/assets/professions/nodejs.png')
-    .reply(200, resource)
+  reqNock(domain, '/courses', basicHTML)
+  reqNock(domain, '/assets/professions/nodejs.png', resource)
 
-  const resUrl = await pageLoader('https://ru.hexlet.io/courses', pageDir)
-  expect(resUrl).toBe(filenameLoader)
+  const resUrl = await pageLoader(targetUrl, pageDir)
+  expect(resUrl).toBe(pageFilename)
 
-  const actual = await readFile(getFile(filenameLoader), 'utf-8')
+  const actual = await getContentFile(getPath(pageDir, pageFilename))
   const $actual = cheerio.load(actual)
   const $expected = cheerio.load(expectedHTML)
   expect($actual.html()).toBe($expected.html())
 
-  await (expect(stat(getFile(dirnameLoader, resourceLoader)))).resolves.toBeDefined()
+  await (expect(stat(getPath(pageDir, resourcesDirName, resourceFilename)))).resolves.toBeDefined()
 })
 
 test('checking the loading of the page and other resources from the page to the specified directory', async () => {
-  const getFixture = filename => path.join(process.cwd(), '__fixtures__', filename)
-  const getFile = (...filepath) => path.join(pageDir, ...filepath)
+  const basicHTML = await getContentFile(getFixture('basic2.html'))
+  const expectedHTML = await getContentFile(getFixture('expected2.html'))
 
-  const basicHTML = await readFile(getFixture('basic2.html'), 'utf-8')
-  const expectedHTML = await readFile(getFixture('expected2.html'), 'utf-8')
-
-  const filenameLoader = 'ru-hexlet-io-courses.html'
-  const dirnameLoader = 'ru-hexlet-io-courses_files'
-  const recources = [
-    { reqParams: '/assets/professions/nodejs.png', content: Buffer.from('fake image content'), filename: 'ru-hexlet-io-assets-professions-nodejs.png' },
-    { reqParams: '/assets/application.css', content: 'body { color: red; }', filename: 'ru-hexlet-io-assets-application.css' },
-    { reqParams: '/packs/js/runtime.js', content: 'console.log("test")', filename: 'ru-hexlet-io-packs-js-runtime.js' },
-    { reqParams: '/courses', content: '<div>Hello, World!</div>', filename: 'ru-hexlet-io-courses.html' }
+  const resources = [
+    { urlPath: '/assets/professions/nodejs.png', content: Buffer.from('fake image content'), filename: 'ru-hexlet-io-assets-professions-nodejs.png' },
+    { urlPath: '/assets/application.css', content: 'body { color: red; }', filename: 'ru-hexlet-io-assets-application.css' },
+    { urlPath: '/packs/js/runtime.js', content: 'console.log("test")', filename: 'ru-hexlet-io-packs-js-runtime.js' },
+    { urlPath: '/courses', content: '<div>Hello, World!</div>', filename: pageFilename }
   ]
-  
-  nock('https://ru.hexlet.io')
-    .get('/courses')
-    .reply(200, basicHTML)
 
-  recources.forEach(({ reqParams, content }) => {
-    nock('https://ru.hexlet.io')
-    .get(reqParams)
-    .reply(200, content)
-  })
+  reqNock(domain, '/courses', basicHTML)
+  resources.forEach(({ urlPath, content }) => reqNock(domain, urlPath, content))
 
-  const resUrl = await pageLoader('https://ru.hexlet.io/courses', pageDir)
-  expect(resUrl).toBe(filenameLoader)
+  const resUrl = await pageLoader(targetUrl, pageDir)
+  expect(resUrl).toBe(pageFilename)
 
-  const actual = await readFile(getFile(filenameLoader), 'utf-8')
+  const actual = await getContentFile(getPath(pageDir, pageFilename))
   const $actual = cheerio.load(actual)
   const $expected = cheerio.load(expectedHTML)
   expect($actual.html()).toBe($expected.html())
 
   await Promise.all(
-    recources.map(({ filename }) => 
-      expect(stat(getFile(dirnameLoader, filename))).resolves.toBeDefined()))
+    resources.map(({ filename }) => 
+      expect(stat(getPath(pageDir, resourcesDirName, filename))).resolves.toBeDefined()))
 })
 
 
 afterEach(async () => {
+  nock.cleanAll()
   await rm(pageDir, { recursive: true, force: true })
 })
