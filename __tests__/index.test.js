@@ -13,16 +13,17 @@ beforeEach(async () => {
 
 test('checking the installation of the page from the internet and checking the creation of a file in the specified directory', async () => {
   const filename = 'ru-hexlet-io-courses.html'
-  const content = `<div>Page</div>`
+  const beforeHTML = `<div>Page</div>`
+  const afterHTML = `<html><head></head><body><div>Page</div></body></html>`
 
   nock('https://ru.hexlet.io')
     .get('/courses')
-    .reply(200, content)
+    .reply(200, beforeHTML)
 
   const resUrl = await pageLoader('https://ru.hexlet.io/courses', pageDir)
 
   expect(resUrl).toBe(filename)
-  await expect(readFile(path.join(pageDir, filename), 'utf-8')).resolves.toBe(content)
+  await expect(readFile(path.join(pageDir, filename), 'utf-8')).resolves.toBe(afterHTML)
 })
 
 test('checking the download of the page and images to the specified directory', async () => {
@@ -31,6 +32,7 @@ test('checking the download of the page and images to the specified directory', 
 
   const beforeHTML = await readFile(getFixture('before.html'), 'utf-8')
   const afterHTML = await readFile(getFixture('after.html'), 'utf-8')
+  const nodejsPng = await readFile(getFixture('nodejs.png'))
 
   const filenameLoader = 'ru-hexlet-io-courses.html'
   const dirnameLoader = 'ru-hexlet-io-courses_files'
@@ -39,6 +41,10 @@ test('checking the download of the page and images to the specified directory', 
   nock('https://ru.hexlet.io')
     .get('/courses')
     .reply(200, beforeHTML)
+
+  nock('https://ru.hexlet.io')
+    .get('/assets/professions/nodejs.png')
+    .reply(200, nodejsPng)
 
   const resUrl = await pageLoader('https://ru.hexlet.io/courses', pageDir)
 
