@@ -6,10 +6,10 @@ import nock from 'nock'
 import * as cheerio from 'cheerio'
 import pageLoader from '../src/index.js'
 
-const reqNock = (domain, urlPath, content) => 
+const reqNock = (domain, urlPath, statusCode, content) => 
   nock(domain)
     .get(urlPath)
-    .reply(200, content)
+    .reply(statusCode, content)
 
 const getPath = (dirName, ...filepath) => path.join(dirName, ...filepath)
 const getContentFile = pathname => readFile(pathname, 'utf-8')
@@ -28,7 +28,7 @@ beforeEach(async () => {
 
 test('checking the installation of the page from the internet and checking the creation of a file in the specified directory', async () => {
   const basic = `<div>Page</div>`
-  reqNock(domain, '/courses', basic)
+  reqNock(domain, '/courses', 200, basic)
 
   const resUrl = await pageLoader(targetUrl, pageDir)
   expect(resUrl).toBe(pageFilename)
@@ -46,8 +46,8 @@ test('checking the download of the page and images to the specified directory', 
 
   const resourceFilename = 'ru-hexlet-io-assets-professions-nodejs.png'
 
-  reqNock(domain, '/courses', basicHTML)
-  reqNock(domain, '/assets/professions/nodejs.png', resource)
+  reqNock(domain, '/courses', 200, basicHTML)
+  reqNock(domain, '/assets/professions/nodejs.png', 200, resource)
 
   const resUrl = await pageLoader(targetUrl, pageDir)
   expect(resUrl).toBe(pageFilename)
@@ -71,8 +71,8 @@ test('checking the loading of the page and other resources from the page to the 
     { urlPath: '/courses', content: '<div>Hello, World!</div>', filename: pageFilename }
   ]
 
-  reqNock(domain, '/courses', basicHTML)
-  resources.forEach(({ urlPath, content }) => reqNock(domain, urlPath, content))
+  reqNock(domain, '/courses', 200, basicHTML)
+  resources.forEach(({ urlPath, content }) => reqNock(domain, urlPath, 200, content))
 
   const resUrl = await pageLoader(targetUrl, pageDir)
   expect(resUrl).toBe(pageFilename)
@@ -85,6 +85,47 @@ test('checking the loading of the page and other resources from the page to the 
   await Promise.all(
     resources.map(({ filename }) => 
       expect(stat(getPath(pageDir, resourcesDirName, filename))).resolves.toBeDefined()))
+})
+
+test('check the situation if the specified page is not available on the internet', async () => {
+  reqNock(domain, '/courses', 404)
+  await expect(() => pageLoader(targetUrl, pageDir)).rejects.toThrow(`Страница по адресу ${targetUrl} не найдена`)
+})
+
+test('check the situation if the specified directory is missing', async () => {
+  const pageDir = '/undefined'
+  const basic = `<div>Page</div>`
+  reqNock(domain, '/courses', 200, basic)
+
+  await expect(() => pageLoader(targetUrl, pageDir)).rejects.toThrow(`Указанная директория ${pageDir} не существует`)
+})
+
+test('check the situation when there are no write permissions for the directory', async () => {
+  const pageDir = '/bin'
+  const basic = `<div>Page</div>`
+  reqNock(domain, '/courses', 200, basic)
+
+  await expect(() => pageLoader(targetUrl, pageDir)).rejects.toThrow(`Нет прав на запись в директорию ${pageDir}`)
+})
+
+test('check the situation if the resource from the page is not available on the internet', async () => {
+  const basicHTML = await getContentFile(getFixture('basic1.html'))
+  const expectedHTML = await getContentFile(getFixture('expected1.html'))
+
+  const resourceFilename = 'ru-hexlet-io-assets-professions-nodejs.png'
+
+  reqNock(domain, '/courses', 200, basicHTML)
+  reqNock(domain, '/assets/professions/nodejs.png', 404)
+
+  const resUrl = await pageLoader(targetUrl, pageDir)
+  expect(resUrl).toBe(pageFilename)
+
+  const actual = await getContentFile(getPath(pageDir, pageFilename))
+  const $actual = cheerio.load(actual)
+  const $expected = cheerio.load(expectedHTML)
+  expect($actual.html()).toBe($expected.html())
+
+  await expect(stat(getPath(pageDir, resourcesDirName, resourceFilename))).rejects.toBeDefined()
 })
 
 
