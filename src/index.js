@@ -48,7 +48,7 @@ const downloadResources = ($, targetUrl, filesDirName, outputDir) => {
   return Promise.all(promises)
 }
 
-export default (targetUrl, outputDir) => {
+export default (targetUrl, outputDir = process.cwd()) => {
   const url = new URL(targetUrl)
   const filename = `${parserLink(targetUrl)}.html`
   const filepath = path.join(outputDir, filename)
