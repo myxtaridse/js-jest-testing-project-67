@@ -1,6 +1,6 @@
 import { test, expect, beforeEach, afterEach } from 'vitest'
 import os from 'os'
-import { mkdtemp, readFile, rm, stat } from 'fs/promises'
+import { chmod, mkdtemp, readFile, rm, stat } from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import nock from 'nock'
@@ -107,11 +107,16 @@ test('check the situation if the specified directory is missing', async () => {
 })
 
 test('check the situation when there are no write permissions for the directory', async () => {
-  const pageDir = '/bin'
   const basic = `<div>Page</div>`
   reqNock(domain, '/courses', 200, basic)
 
+  // для понимания прав для директории лучше использовать временную с ограниченными правами
+  // поскольку '/bin' не дает гарантии в закрытости или открытости для записи
+  // 0o444 -> S_IRUSR | S_IRGRP | S_IROTH
+  await chmod(pageDir, 0o444)
+
   await expect(pageLoader(targetUrl, pageDir)).rejects.toThrow(`Нет прав на запись в директорию ${pageDir}`)
+  await chmod(pageDir, 0o755)
 })
 
 test('check the situation if the resource from the page is not available on the internet', async () => {
