@@ -7,7 +7,7 @@ import fsp, { mkdir } from 'fs/promises'
 import path from 'path'
 import * as cheerio from 'cheerio'
 import debug from 'debug'
-const log =  debug.debug('page-loader')
+const log = debug.debug('page-loader')
 
 const parserLink = (link) => {
   return link
@@ -59,21 +59,24 @@ export default (targetUrl, outputDir) => {
       const $ = cheerio.load(data)
 
       return mkdir(path.join(outputDir, filesDirName))
-      .catch((err) => {
-        if (err.code === 'ENOENT') {
-          throw new Error(`Указанная директория ${outputDir} не существует`)
-        }
-        if (err.code === 'EACCES') {
-          throw new Error(`Нет прав на запись в директорию ${outputDir}`)
-        }
-        throw err
-      })
-      .then(() => downloadResources($, url, filesDirName, outputDir))
-      .then(() => $.html())
-      .then((html) => fsp.writeFile(pathname, html))
-      .then(() => filename)
+        .then(() => downloadResources($, url, filesDirName, outputDir))
+        .then(() => $.html())
+        .then(html => fsp.writeFile(pathname, html))
+        .then(() => filename)
+        .catch((err) => {
+          if (err.code === 'ENOENT') {
+            throw new Error(`Указанная директория ${outputDir} не существует`)
+          }
+          if (err.code === 'EACCES') {
+            throw new Error(`Нет прав на запись в директорию ${outputDir}`)
+          }
+          if (err.code === 'EEXIST') {
+            throw new Error(`Страница по адресу ${targetUrl} уже была скачена в директорию ${outputDir}`)
+          }
+          throw err
+        })
     })
-    .catch(err => {
+    .catch((err) => {
       if (axios.isAxiosError(err)) {
         throw new Error(`Страница по адресу ${targetUrl} не найдена`)
       }

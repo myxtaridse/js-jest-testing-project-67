@@ -6,7 +6,7 @@ import nock from 'nock'
 import * as cheerio from 'cheerio'
 import pageLoader from '../src/index.js'
 
-const reqNock = (domain, urlPath, statusCode, content) => 
+const reqNock = (domain, urlPath, statusCode, content) =>
   nock(domain)
     .get(urlPath)
     .reply(statusCode, content)
@@ -24,7 +24,6 @@ let pageDir = null
 beforeEach(async () => {
   pageDir = await mkdtemp(getPath(os.tmpdir(), 'page-loader-'))
 })
-
 
 test('checking the installation of the page from the internet and checking the creation of a file in the specified directory', async () => {
   const basic = `<div>Page</div>`
@@ -68,7 +67,7 @@ test('checking the loading of the page and other resources from the page to the 
     { urlPath: '/assets/professions/nodejs.png', content: Buffer.from('fake image content'), filename: 'ru-hexlet-io-assets-professions-nodejs.png' },
     { urlPath: '/assets/application.css', content: 'body { color: red; }', filename: 'ru-hexlet-io-assets-application.css' },
     { urlPath: '/packs/js/runtime.js', content: 'console.log("test")', filename: 'ru-hexlet-io-packs-js-runtime.js' },
-    { urlPath: '/courses', content: '<div>Hello, World!</div>', filename: pageFilename }
+    { urlPath: '/courses', content: '<div>Hello, World!</div>', filename: pageFilename },
   ]
 
   reqNock(domain, '/courses', 200, basicHTML)
@@ -83,7 +82,7 @@ test('checking the loading of the page and other resources from the page to the 
   expect($actual.html()).toBe($expected.html())
 
   await Promise.all(
-    resources.map(({ filename }) => 
+    resources.map(({ filename }) =>
       expect(stat(getPath(pageDir, resourcesDirName, filename))).resolves.toBeDefined()))
 })
 
@@ -127,7 +126,6 @@ test('check the situation if the resource from the page is not available on the 
 
   await expect(stat(getPath(pageDir, resourcesDirName, resourceFilename))).rejects.toBeDefined()
 })
-
 
 afterEach(async () => {
   nock.cleanAll()
