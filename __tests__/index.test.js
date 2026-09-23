@@ -91,7 +91,7 @@ test('checking the loading of the page and other resources from the page to the 
 
 test('check the situation if the specified page is not available on the internet', async () => {
   reqNock(domain, '/courses', 404)
-  await expect(() => pageLoader(targetUrl, pageDir)).rejects.toThrow(`Страница по адресу ${targetUrl} не найдена`)
+  await expect(pageLoader(targetUrl, pageDir)).rejects.toThrow(`Страница по адресу ${targetUrl} не найдена`)
 })
 
 test('check the situation if the specified directory is missing', async () => {
@@ -99,7 +99,7 @@ test('check the situation if the specified directory is missing', async () => {
   const basic = `<div>Page</div>`
   reqNock(domain, '/courses', 200, basic)
 
-  await expect(() => pageLoader(targetUrl, pageDir)).rejects.toThrow(`Указанная директория ${pageDir} не существует`)
+  await expect(pageLoader(targetUrl, pageDir)).rejects.toThrow(`Указанная директория ${pageDir} не существует`)
 })
 
 test('check the situation when there are no write permissions for the directory', async () => {
@@ -107,7 +107,7 @@ test('check the situation when there are no write permissions for the directory'
   const basic = `<div>Page</div>`
   reqNock(domain, '/courses', 200, basic)
 
-  await expect(() => pageLoader(targetUrl, pageDir)).rejects.toThrow(`Нет прав на запись в директорию ${pageDir}`)
+  await expect(pageLoader(targetUrl, pageDir)).rejects.toThrow(`Нет прав на запись в директорию ${pageDir}`)
 })
 
 test('check the situation if the resource from the page is not available on the internet', async () => {
