@@ -30,10 +30,10 @@ test('checking the installation of the page from the internet and checking the c
   reqNock(domain, '/courses', 200, basic)
 
   const resUrl = await pageLoader(targetUrl, pageDir)
-  const rightPath = getPath(pageDir, pageFilename)
-  expect(resUrl).toBe(rightPath)
+  const rightPath = { filepath: getPath(pageDir, pageFilename) }
+  expect(resUrl).toEqual(rightPath)
 
-  const actual = await getContentFile(rightPath)
+  const actual = await getContentFile(rightPath.filepath)
   const $actual = cheerio.load(actual)
   const $expected = cheerio.load(basic)
   expect($actual.html()).toBe($expected.html())
@@ -50,10 +50,10 @@ test('checking the download of the page and images to the specified directory', 
   reqNock(domain, '/assets/professions/nodejs.png', 200, resource)
 
   const resUrl = await pageLoader(targetUrl, pageDir)
-  const rightPath = getPath(pageDir, pageFilename)
-  expect(resUrl).toBe(rightPath)
+  const rightPath = { filepath: getPath(pageDir, pageFilename) }
+  expect(resUrl).toEqual(rightPath)
 
-  const actual = await getContentFile(rightPath)
+  const actual = await getContentFile(rightPath.filepath)
   const $actual = cheerio.load(actual)
   const $expected = cheerio.load(expectedHTML)
   expect($actual.html()).toBe($expected.html())
@@ -76,10 +76,10 @@ test('checking the loading of the page and other resources from the page to the 
   resources.forEach(({ urlPath, content }) => reqNock(domain, urlPath, 200, content))
 
   const resUrl = await pageLoader(targetUrl, pageDir)
-  const rightPath = getPath(pageDir, pageFilename)
-  expect(resUrl).toBe(rightPath)
+  const rightPath = { filepath: getPath(pageDir, pageFilename) }
+  expect(resUrl).toEqual(rightPath)
 
-  const actual = await getContentFile(rightPath)
+  const actual = await getContentFile(rightPath.filepath)
   const $actual = cheerio.load(actual)
   const $expected = cheerio.load(expectedHTML)
   expect($actual.html()).toBe($expected.html())
@@ -120,10 +120,10 @@ test('check the situation if the resource from the page is not available on the 
   reqNock(domain, '/assets/professions/nodejs.png', 404)
 
   const resUrl = await pageLoader(targetUrl, pageDir)
-  const rightPath = getPath(pageDir, pageFilename)
-  expect(resUrl).toBe(rightPath)
+  const rightPath = { filepath: getPath(pageDir, pageFilename) }
+  expect(resUrl).toEqual(rightPath)
 
-  const actual = await getContentFile(rightPath)
+  const actual = await getContentFile(rightPath.filepath)
   const $actual = cheerio.load(actual)
   const $expected = cheerio.load(expectedHTML)
   expect($actual.html()).toBe($expected.html())

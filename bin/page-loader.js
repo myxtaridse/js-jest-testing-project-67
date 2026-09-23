@@ -12,10 +12,10 @@ program
   .option('-o, --output <dir>', 'output dir', process.cwd())
   .action((targetUrl, { output }) => {
     pageLoader(targetUrl, output)
-      .then((data) => {
+      .then(({ filepath }) => {
         log.color = 5
-        console.log(`✔️    Страница успешно скачена: ${data}`)
-        log(data)
+        console.log(`✔️    Страница успешно скачена: ${filepath}`)
+        log(filepath)
       })
       .catch((err) => {
         console.warn(`❌   Ошибка: ${err.message}`)

@@ -51,7 +51,7 @@ const downloadResources = ($, targetUrl, filesDirName, outputDir) => {
 export default (targetUrl, outputDir) => {
   const url = new URL(targetUrl)
   const filename = `${parserLink(targetUrl)}.html`
-  const pathname = path.join(outputDir, filename)
+  const filepath = path.join(outputDir, filename)
   const filesDirName = filename.replace(/.html/, '_files')
 
   return axios.get(targetUrl)
@@ -61,8 +61,8 @@ export default (targetUrl, outputDir) => {
       return mkdir(path.join(outputDir, filesDirName))
         .then(() => downloadResources($, url, filesDirName, outputDir))
         .then(() => $.html())
-        .then(html => fsp.writeFile(pathname, html))
-        .then(() => pathname)
+        .then(html => fsp.writeFile(filepath, html))
+        .then(() => ({ filepath }))
         .catch((err) => {
           if (err.code === 'ENOENT') {
             throw new Error(`Указанная директория ${outputDir} не существует`)
