@@ -1,13 +1,19 @@
-import axios from 'axios'
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+require('axios-debug-log')
+const axios = require('axios')
+
 import fsp, { mkdir } from 'fs/promises'
 import path from 'path'
 import * as cheerio from 'cheerio'
+import debug from 'debug'
+const log =  debug.debug('page-loader')
 
 const parserLink = (link) => {
   return link
     .replace(/^https?:\/\//, '')
-    .replace(/\//g, '.')
-    .replace(/\./g, '-')
+    .replace(/\/$/, '')
+    .replace(/[^a-zA-Z0-9]/g, '-')
 }
 
 const filesForModified = [
@@ -32,6 +38,10 @@ const downloadResources = ($, targetUrl, filesDirName, outputDir) => {
       $(el).attr(attr, filepath)
       const promise = axios.get(urlResource.href, { responseType })
         .then(({ data }) => fsp.writeFile(path.join(outputDir, filepath), data))
+        .catch((err) => {
+          log(`failed to download resource ${urlResource.href}: ${err.message}`)
+          return
+        })
       promises.push(promise)
     })
   })
@@ -44,18 +54,29 @@ export default (targetUrl, outputDir) => {
   const pathname = path.join(outputDir, filename)
   const filesDirName = filename.replace(/.html/, '_files')
 
-  if (process.env.NODE_ENV !== 'test') {
-    return Promise.resolve(filename)
-  }
-
   return axios.get(targetUrl)
     .then(({ data }) => {
       const $ = cheerio.load(data)
 
       return mkdir(path.join(outputDir, filesDirName))
+      .catch((err) => {
+        if (err.code === 'ENOENT') {
+          throw new Error(`Указанная директория ${outputDir} не существует`)
+        }
+        if (err.code === 'EACCES') {
+          throw new Error(`Нет прав на запись в директорию ${outputDir}`)
+        }
+        throw err
+      })
       .then(() => downloadResources($, url, filesDirName, outputDir))
       .then(() => $.html())
       .then((html) => fsp.writeFile(pathname, html))
       .then(() => filename)
+    })
+    .catch(err => {
+      if (axios.isAxiosError(err)) {
+        throw new Error(`Страница по адресу ${targetUrl} не найдена`)
+      }
+      throw err
     })
 }
