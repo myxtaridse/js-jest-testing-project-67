@@ -107,15 +107,19 @@ test('check the situation if the specified directory is missing', async () => {
 })
 
 test('check the situation when there are no write permissions for the directory', async () => {
+  if (process.getuid?.() === 0) {
+    return
+  }
   const basic = `<div>Page</div>`
   reqNock(domain, '/courses', 200, basic)
 
   // для понимания прав для директории лучше использовать временную с ограниченными правами
   // поскольку '/bin' не дает гарантии в закрытости или открытости для записи
   // 0o444 -> S_IRUSR | S_IRGRP | S_IROTH
-  await chmod(pageDir, 0o000)
+  await chmod(pageDir, 0o444)
 
   await expect(pageLoader(targetUrl, pageDir)).rejects.toThrow(`Нет прав на запись в директорию ${pageDir}`)
+  // 0o444 -> S_IRUSR | S_IRGRP | S_IROTH
   await chmod(pageDir, 0o755)
 })
 
