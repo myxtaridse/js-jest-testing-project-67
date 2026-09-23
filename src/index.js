@@ -62,7 +62,7 @@ export default (targetUrl, outputDir) => {
         .then(() => downloadResources($, url, filesDirName, outputDir))
         .then(() => $.html())
         .then(html => fsp.writeFile(pathname, html))
-        .then(() => filename)
+        .then(() => pathname)
         .catch((err) => {
           if (err.code === 'ENOENT') {
             throw new Error(`Указанная директория ${outputDir} не существует`)
