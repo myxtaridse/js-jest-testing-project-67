@@ -2,9 +2,13 @@ import { test, expect, beforeEach, afterEach } from 'vitest'
 import os from 'os'
 import { mkdtemp, readFile, rm, stat } from 'fs/promises'
 import path from 'path'
+import { fileURLToPath } from 'url'
 import nock from 'nock'
 import * as cheerio from 'cheerio'
 import pageLoader from '../src/index.js'
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const reqNock = (domain, urlPath, statusCode, content) =>
   nock(domain)
@@ -13,7 +17,7 @@ const reqNock = (domain, urlPath, statusCode, content) =>
 
 const getPath = (dirName, ...filepath) => path.join(dirName, ...filepath)
 const getContentFile = pathname => readFile(pathname, 'utf-8')
-const getFixture = filename => path.join(process.cwd(), '__fixtures__', filename)
+const getFixture = filename => path.join(__dirname, '..', '__fixtures__', filename)
 
 const domain = 'https://ru.hexlet.io'
 const pageFilename = 'ru-hexlet-io-courses.html'
