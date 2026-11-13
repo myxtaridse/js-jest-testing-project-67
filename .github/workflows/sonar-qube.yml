@@ -1,10 +1,8 @@
 name: SonarQube
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    types: [opened, synchronize, reopened]
+  workflow_run:
+    workflows: ["test-check"]
+    types: [completed]
 jobs:
   build:
     name: Build and analyze
