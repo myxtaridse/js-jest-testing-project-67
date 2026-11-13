@@ -64,10 +64,26 @@ test('checking the loading of the page and other resources from the page to the 
   const expectedHTML = await getContentFile(getFixture('expected2.html'))
 
   const resources = [
-    { urlPath: '/assets/professions/nodejs.png', content: Buffer.from('fake image content'), filename: 'ru-hexlet-io-assets-professions-nodejs.png' },
-    { urlPath: '/assets/application.css', content: 'body { color: red; }', filename: 'ru-hexlet-io-assets-application.css' },
-    { urlPath: '/packs/js/runtime.js', content: 'console.log("test")', filename: 'ru-hexlet-io-packs-js-runtime.js' },
-    { urlPath: '/courses', content: '<div>Hello, World!</div>', filename: pageFilename },
+    {
+      urlPath: '/assets/professions/nodejs.png',
+      content: Buffer.from('fake image content'),
+      filename: 'ru-hexlet-io-assets-professions-nodejs.png',
+    },
+    {
+      urlPath: '/assets/application.css',
+      content: 'body { color: red; }',
+      filename: 'ru-hexlet-io-assets-application.css',
+    },
+    {
+      urlPath: '/packs/js/runtime.js',
+      content: 'console.log("test")',
+      filename: 'ru-hexlet-io-packs-js-runtime.js',
+    },
+    {
+      urlPath: '/courses',
+      content: '<div>Hello, World!</div>',
+      filename: pageFilename,
+    },
   ]
 
   reqNock(domain, '/courses', 200, basicHTML)
@@ -112,7 +128,6 @@ test('check the situation when there are no write permissions for the directory'
   await chmod(pageDir, 0o444)
 
   await expect(pageLoader(targetUrl, pageDir)).rejects.toThrow(`Нет прав на запись в директорию ${pageDir}`)
-  // 0o444 -> S_IRUSR | S_IRGRP | S_IROTH
   await chmod(pageDir, 0o755)
 })
 
