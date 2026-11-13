@@ -1,4 +1,6 @@
 import { createRequire } from 'module'
+import filesForModified from './config/filesForModified.json' with { type: 'json' }
+import { parserLink } from './utils/index.js'
 const require = createRequire(import.meta.url)
 require('axios-debug-log')
 const axios = require('axios')
@@ -8,19 +10,6 @@ import path from 'path'
 import * as cheerio from 'cheerio'
 import debug from 'debug'
 const log = debug.debug('page-loader')
-
-const parserLink = (link) => {
-  return link
-    .replace(/^https?:\/\//, '')
-    .replace(/\/$/, '')
-    .replace(/[^a-zA-Z0-9]/g, '-')
-}
-
-const filesForModified = [
-  { tagname: 'img', attr: 'src', responseType: 'arraybuffer' },
-  { tagname: 'link', attr: 'href', responseType: 'arraybuffer' },
-  { tagname: 'script', attr: 'src', responseType: 'arraybuffer' },
-]
 
 const downloadResources = ($, targetUrl, filesDirName, outputDir) => {
   const promises = []
