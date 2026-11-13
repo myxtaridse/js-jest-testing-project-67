@@ -42,29 +42,30 @@ const downloadResources = ($, targetUrl, filesDirName, outputDir) => {
 }
 
 export default (targetUrl, outputDir = process.cwd()) => {
+  const resolvedOutput = path.resolve(outputDir)
   const url = new URL(targetUrl)
   const filename = `${parserLink(targetUrl)}.html`
-  const filepath = path.join(outputDir, filename)
+  const filepath = path.join(resolvedOutput, filename)
   const filesDirName = filename.replace(/.html/, '_files')
 
   return axios.get(targetUrl)
     .then(({ data }) => {
       const $ = cheerio.load(data)
 
-      return mkdir(path.join(outputDir, filesDirName))
+      return mkdir(path.join(resolvedOutput, filesDirName))
         .then(() => downloadResources($, url, filesDirName, outputDir))
         .then(() => $.html())
         .then(html => fsp.writeFile(filepath, html))
         .then(() => ({ filepath }))
         .catch((err) => {
           if (err.code === 'ENOENT') {
-            throw new Error(`Указанная директория ${outputDir} не существует`)
+            throw new Error(`Указанная директория ${resolvedOutput} не существует`, { cause: err })
           }
           if (err.code === 'EACCES') {
-            throw new Error(`Нет прав на запись в директорию ${outputDir}`)
+            throw new Error(`Нет прав на запись в директорию ${resolvedOutput}`, { cause: err })
           }
           if (err.code === 'EEXIST') {
-            throw new Error(`Страница по адресу ${targetUrl} уже была скачена в директорию ${outputDir}`)
+            throw new Error(`Страница по адресу ${targetUrl} уже была скачена в директорию ${resolvedOutput}`, { cause: err })
           }
           throw err
         })
