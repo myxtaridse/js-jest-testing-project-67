@@ -29,8 +29,10 @@ const downloadResources = ($, targetUrl, filesDirName, outputDir) => {
 
       const promise = axios.get(resourceUrl.href, { responseType })
         .then(({ data }) => fsp.writeFile(path.join(outputDir, filepath), data))
+        .then(() => console.log(`✔️    Ресурс успешно скачен: ${resourceUrl}`))
         .catch((err) => {
-          log(`failed to download resource ${urlResource.href}: ${err.message}`)
+          console.warn(`⚠️   Не удалось скачать ресурс: ${resourceUrl}`)
+          log(`failed to download resource ${resourceUrl.href}: ${err.message}`)
           return
         })
       promises.push(promise)
