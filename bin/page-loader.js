@@ -11,7 +11,7 @@ program
   .argument('<targetUrl>')
   .option('-o, --output <dir>', 'output dir', process.cwd())
   .action((targetUrl, { output }) => {
-    pageLoader(targetUrl, output)
+    return pageLoader(targetUrl, output)
       .then(({ filepath }) => {
         log.color = 5
         console.log(`✔️    Страница успешно скачена: ${filepath}`)
@@ -26,4 +26,4 @@ program
       })
   })
 
-program.parse()
+program.parseAsync()
