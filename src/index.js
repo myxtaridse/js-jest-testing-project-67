@@ -72,7 +72,10 @@ export default (targetUrl, outputDir = process.cwd()) => {
     })
     .catch((err) => {
       if (axios.isAxiosError(err)) {
-        throw new Error(`Страница по адресу ${targetUrl} не найдена`)
+        throw new Error(`Страница по адресу ${targetUrl} не найдена`, { cause: err })
+      }
+      else if (err.code === 'ERR_INVALID_URL') {
+        throw new Error(`Ссылка ${targetUrl} является синтаксически неверной. Попробуйте переписать ее.`, { cause: err })
       }
       throw err
     })
