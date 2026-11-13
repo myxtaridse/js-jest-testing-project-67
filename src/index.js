@@ -16,16 +16,18 @@ const downloadResources = ($, targetUrl, filesDirName, outputDir) => {
   filesForModified.forEach(({ tagname, attr, responseType }) => {
     $(tagname).each((_i, el) => {
       const currentAttr = $(el).attr(attr)
-      const urlResource = new URL(currentAttr, targetUrl)
-      if (targetUrl.hostname !== urlResource.hostname) return
+      const resourceUrl = new URL(currentAttr, targetUrl)
+
+      if (targetUrl.hostname !== resourceUrl.hostname) return
 
       const hostname = targetUrl.hostname.replace(/\./g, '-')
-      const changeAttr = urlResource.pathname.replace(/\//g, '-')
+      const changeAttr = resourceUrl.pathname.replace(/\//g, '-')
       const addExpansion = changeAttr.split('.').length > 1 ? '' : '.html'
       const filepath = `${filesDirName}/${[hostname, changeAttr].join('')}${addExpansion}`
 
       $(el).attr(attr, filepath)
-      const promise = axios.get(urlResource.href, { responseType })
+
+      const promise = axios.get(resourceUrl.href, { responseType })
         .then(({ data }) => fsp.writeFile(path.join(outputDir, filepath), data))
         .catch((err) => {
           log(`failed to download resource ${urlResource.href}: ${err.message}`)
