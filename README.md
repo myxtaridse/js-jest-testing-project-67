@@ -1,5 +1,5 @@
 ### Hexlet tests and linter status:
-[![hexlet-check](https://github.com/myxtaridse/js-jest-testing-project-67/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/myxtaridse/js-jest-testing-project-67/actions)
+[![hexlet-check](https://github.com/myxtaridse/js-jest-testing-project-67/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/myxtaridse/js-jest-testing-project-67/actions) [![test-check](https://github.com/myxtaridse/js-jest-testing-project-67/actions/workflows/test-check.yml/badge.svg)](https://github.com/myxtaridse/js-jest-testing-project-67/actions/workflows/test-check.yml) [![Quality gate status](https://sonarcloud.io/api/project_badges/measure?project=myxtaridse_js-jest-testing-project-67&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=myxtaridse_js-jest-testing-project-67) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=myxtaridse_js-jest-testing-project-67&metric=coverage)](https://sonarcloud.io/summary/new_code?id=myxtaridse_js-jest-testing-project-67)
 
 # Тестирование загрузчика страниц (JS)
 
