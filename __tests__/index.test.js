@@ -29,9 +29,8 @@ test('checking the installation of the page from the internet and checking the c
   const basic = `<div>Page</div>`
   reqNock(domain, '/courses', 200, basic)
 
-  const resUrl = await pageLoader(targetUrl, pageDir)
   const rightPath = { filepath: getPath(pageDir, pageFilename) }
-  expect(resUrl).toEqual(rightPath)
+  await expect(pageLoader(targetUrl, pageDir)).resolves.toEqual(rightPath)
 
   const actual = await getContentFile(rightPath.filepath)
   const $actual = cheerio.load(actual)
@@ -49,9 +48,8 @@ test('checking the download of the page and images to the specified directory', 
   reqNock(domain, '/courses', 200, basicHTML)
   reqNock(domain, '/assets/professions/nodejs.png', 200, resource)
 
-  const resUrl = await pageLoader(targetUrl, pageDir)
   const rightPath = { filepath: getPath(pageDir, pageFilename) }
-  expect(resUrl).toEqual(rightPath)
+  await expect(pageLoader(targetUrl, pageDir)).resolves.toEqual(rightPath)
 
   const actual = await getContentFile(rightPath.filepath)
   const $actual = cheerio.load(actual)
@@ -75,9 +73,8 @@ test('checking the loading of the page and other resources from the page to the 
   reqNock(domain, '/courses', 200, basicHTML)
   resources.forEach(({ urlPath, content }) => reqNock(domain, urlPath, 200, content))
 
-  const resUrl = await pageLoader(targetUrl, pageDir)
   const rightPath = { filepath: getPath(pageDir, pageFilename) }
-  expect(resUrl).toEqual(rightPath)
+  await expect(pageLoader(targetUrl, pageDir)).resolves.toEqual(rightPath)
 
   const actual = await getContentFile(rightPath.filepath)
   const $actual = cheerio.load(actual)
@@ -128,9 +125,8 @@ test('check the situation if the resource from the page is not available on the 
   reqNock(domain, '/courses', 200, basicHTML)
   reqNock(domain, '/assets/professions/nodejs.png', 404)
 
-  const resUrl = await pageLoader(targetUrl, pageDir)
   const rightPath = { filepath: getPath(pageDir, pageFilename) }
-  expect(resUrl).toEqual(rightPath)
+  await expect(pageLoader(targetUrl, pageDir)).resolves.toEqual(rightPath)
 
   const actual = await getContentFile(rightPath.filepath)
   const $actual = cheerio.load(actual)
