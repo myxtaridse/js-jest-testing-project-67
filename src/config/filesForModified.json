@@ -1,0 +1,17 @@
+[
+  {
+    "tagname": "img",
+    "attr": "src",
+    "responseType": "arraybuffer"
+  },
+  {
+    "tagname": "link",
+    "attr": "href",
+    "responseType": "arraybuffer"
+  },
+  {
+    "tagname": "script",
+    "attr": "src",
+    "responseType": "arraybuffer"
+  }
+]
